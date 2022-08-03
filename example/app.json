@@ -1,0 +1,17 @@
+{
+  "name": "welab-rn-ui-example",
+  "displayName": "welab-rn-ui Example",
+  "expo": {
+    "name": "welab-rn-ui Example",
+    "slug": "welab-rn-ui-example",
+    "description": "Example app for welab-rn-ui",
+    "owner": "him0305",
+    "privacy": "public",
+    "version": "1.0.0",
+    "platforms": ["ios", "android", "web"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "assetBundlePatterns": ["**/*"]
+  }
+}

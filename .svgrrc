@@ -1,0 +1,14 @@
+{
+  "native": true,
+  "typescript": true,
+  "replaceAttrValues": {
+    "#292830": "{props.color}"
+  },
+  "svgoConfig": {
+    "plugins": [
+      {
+        "removeXMLNS": true
+      }
+    ]
+  }
+}

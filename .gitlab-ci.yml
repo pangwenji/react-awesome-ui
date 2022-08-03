@@ -1,0 +1,43 @@
+image: node:14-alpine3.12
+
+stages:
+  - test
+  - deploy
+  - release
+
+test:
+  stage: test
+  script:
+    - yarn
+    - yarn test
+
+deploy:
+  stage: deploy
+  before_script:
+    - apk --no-cache add git
+    - git config --global user.email "gitlabrunner@welab.com"
+    - git config --global user.name "gitlabrunner"
+  script:
+    - yarn version --new-version ${CI_COMMIT_TAG}
+    - rm yarn.lock
+    - yarn
+    - yarn build
+    - rm .npmrc
+    - echo "@welab:registry=https://nexus-repo.prod-ss.welabts.net/repository/npm-hosted/">.npmrc
+    - git remote set-url origin https://${GIT_USER}:${GIT_PASS}@${GIT_REPO_ADDRESS}
+    - npm config set '//nexus-repo.prod-ss.welabts.net/repository/npm-hosted/:_auth' "${NPM_HOSTED_REPO_TOKEN}"
+    - npm config set '//nexus-repo-proxy.prod-ss.welabts.net/repository/npm/:_auth' "${NPM_REPO_TOKEN}"
+    - npm publish --verbose
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  script:
+    - echo "Create release"
+  release:
+    tag_name: '$CI_COMMIT_TAG'
+    description: '$CI_COMMIT_TAG'
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
